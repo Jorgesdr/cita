@@ -1,0 +1,214 @@
+.main {
+  position: relative;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  overflow: hidden;
+
+  /* Amanecer bonito — montaña con sol saliendo. Cambia el `photo-...` por otro ID de Unsplash si quieres otro cielo. */
+  background-image: url("https://images.unsplash.com/photo-1506905925346-21bda4d32df4?auto=format&fit=crop&w=2000&q=80");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+.backgroundOverlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 183, 130, 0.18) 0%,
+    rgba(255, 124, 145, 0.22) 60%,
+    rgba(120, 60, 110, 0.35) 100%
+  );
+  pointer-events: none;
+  z-index: 0;
+}
+
+.card {
+  position: relative;
+  z-index: 1;
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-radius: 24px;
+  padding: 2.5rem 2rem 2rem;
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.25);
+  max-width: 520px;
+  width: 100%;
+  text-align: center;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+}
+
+.title {
+  margin: 0 0 0.5rem;
+  font-size: clamp(1.6rem, 5vw, 2.4rem);
+  font-weight: 800;
+  color: #4a2740;
+  letter-spacing: -0.02em;
+}
+
+.subtitle {
+  margin: 0 0 1.8rem;
+  color: #6b4660;
+  font-size: 1rem;
+}
+
+/* Contenedor donde el botón "No" puede moverse libremente */
+.buttonsArena {
+  position: relative;
+  height: 180px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+.yesButton {
+  position: absolute;
+  top: 50%;
+  left: 30%;
+  transform: translate(-50%, -50%);
+  background: linear-gradient(135deg, #ff5f8a 0%, #ff8fb1 100%);
+  color: white;
+  border: none;
+  border-radius: 999px;
+  padding: 0.9rem 2.2rem;
+  font-size: 1.15rem;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 10px 25px rgba(255, 95, 138, 0.45);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  z-index: 2;
+}
+
+.yesButton:hover {
+  transform: translate(-50%, -50%) scale(1.06);
+  box-shadow: 0 14px 30px rgba(255, 95, 138, 0.55);
+}
+
+.yesButton:active {
+  transform: translate(-50%, -50%) scale(0.97);
+}
+
+.noButton {
+  position: absolute;
+  top: 50%;
+  left: 70%;
+  transform: translate(0, -50%) scale(1);
+  background: rgba(255, 255, 255, 0.9);
+  color: #4a2740;
+  border: 2px solid #d8b8c8;
+  border-radius: 999px;
+  padding: 0.9rem 2.2rem;
+  font-size: 1.05rem;
+  font-weight: 600;
+  cursor: not-allowed;
+  transition: top 0.18s ease, left 0.18s ease, transform 0.18s ease;
+  z-index: 3;
+  /* Truco: si el usuario llega a hacer click, se mueve otra vez */
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.noButton:hover {
+  /* El botón "huye" antes de que el click aterrice — no necesita nada más porque onMouseEnter lo mueve */
+}
+
+.counter {
+  margin-top: 1rem;
+  color: #8a5a78;
+  font-size: 0.9rem;
+  font-style: italic;
+  min-height: 1.2em;
+}
+
+/* ============ Pantalla de éxito ============ */
+.successCard {
+  position: relative;
+  z-index: 1;
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-radius: 24px;
+  padding: 3rem 2rem;
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.25);
+  max-width: 520px;
+  width: 100%;
+  text-align: center;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  overflow: hidden;
+}
+
+.successTitle {
+  margin: 0 0 1rem;
+  font-size: clamp(1.6rem, 5vw, 2.4rem);
+  color: #b8326a;
+  font-weight: 800;
+}
+
+.successText {
+  margin: 0 0 1.2rem;
+  font-size: 1.1rem;
+  color: #4a2740;
+  line-height: 1.5;
+}
+
+.successSubtext {
+  margin: 0;
+  font-size: 0.95rem;
+  color: #8a5a78;
+  font-style: italic;
+}
+
+.hearts {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.heart {
+  position: absolute;
+  bottom: -2rem;
+  animation: floatUp 4s ease-in infinite;
+  opacity: 0.85;
+}
+
+@keyframes floatUp {
+  0% {
+    transform: translateY(0) rotate(0deg);
+    opacity: 0;
+  }
+  10% {
+    opacity: 0.9;
+  }
+  100% {
+    transform: translateY(-110vh) rotate(360deg);
+    opacity: 0;
+  }
+}
+
+/* ============ Móvil ============ */
+@media (max-width: 520px) {
+  .card,
+  .successCard {
+    padding: 2rem 1.4rem 1.6rem;
+  }
+
+  .buttonsArena {
+    height: 160px;
+  }
+
+  .yesButton {
+    left: 35%;
+    padding: 0.8rem 1.8rem;
+    font-size: 1.05rem;
+  }
+
+  .noButton {
+    padding: 0.8rem 1.8rem;
+    font-size: 1rem;
+  }
+}
