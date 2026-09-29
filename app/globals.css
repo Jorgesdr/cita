@@ -14,7 +14,8 @@ body {
 
 body {
   min-height: 100vh;
-  background: #1a0e1a;
+  /* Sin color de fondo: si el card se demora un frame, no se asoma nada oscuro */
+  background: transparent;
 }
 
 button {
