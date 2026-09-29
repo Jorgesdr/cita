@@ -15,21 +15,8 @@ export default function Home() {
   const arenaRef = useRef<HTMLDivElement | null>(null);
   const yesRef = useRef<HTMLButtonElement | null>(null);
 
-  // Mensajes cachondos que va soltando el botón "No" cuando le intentas pulsar
-  const noMessages = [
-    "No",
-    "¿Segura?",
-    "¿De verdad?",
-    "Piénsalo mejor...",
-    "¡Pero si mola!",
-    "¡Ánimo!",
-    "¿En serio?",
-    "¡Imposible!",
-    "Ni de broma",
-    "¡Buena suerte!",
-    "Sigue soñando",
-    "¡No insistas!",
-  ];
+  // El botón "No" siempre dice "No" (sin cambiar de texto al huir)
+  const currentNoText = "No";
 
   // Mueve el botón "No" a una posición aleatoria que:
 //  1) NUNCA se superpone con "Sí"
@@ -151,8 +138,6 @@ export default function Home() {
       </main>
     );
   }
-
-  const currentNoText = noMessages[Math.min(noCount, noMessages.length - 1)];
 
   return (
     <main className={styles.main}>
