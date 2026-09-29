@@ -191,13 +191,19 @@ export default function Home() {
           </button>
         </div>
 
-        {noCount > 0 && (
-          <p className={styles.counter}>
-            {noCount === 1
+        {/* El contador SIEMPRE existe: cuando noCount=0 está invisible pero reserva
+            el espacio, así el card NO crece al primer hover del "No". */}
+        <p
+          className={styles.counter}
+          style={{ visibility: noCount > 0 ? "visible" : "hidden" }}
+          aria-live="polite"
+        >
+          {noCount === 0
+            ? "\u00A0"
+            : noCount === 1
               ? "El 'No' ya se está escapando…"
               : `El 'No' lleva ${noCount} intentos de huir 🤭`}
-          </p>
-        )}
+        </p>
       </section>
     </main>
   );
