@@ -6,8 +6,14 @@ import styles from "./page.module.css";
 export default function Home() {
   const [saidYes, setSaidYes] = useState(false);
   const [noCount, setNoCount] = useState(0);
-  const [noPos, setNoPos] = useState({ top: 0, left: 0 });
+  // Posición del "No" como % del contenedor (centro del botón).
+  // Inicial: 75% horizontal y 50% vertical → al lado del "Sí" (que está al 25%).
+  const [noPos, setNoPos] = useState<{ left: number; top: number }>({
+    left: 75,
+    top: 50,
+  });
   const arenaRef = useRef<HTMLDivElement | null>(null);
+  const yesRef = useRef<HTMLButtonElement | null>(null);
 
   // Mensajes cachondos que va soltando el botón "No" cuando le intentas pulsar
   const noMessages = [
@@ -25,38 +31,70 @@ export default function Home() {
     "¡No insistas!",
   ];
 
-  // Mueve el botón "No" a una posición aleatoria dentro del contenedor
+  // Mueve el botón "No" a una posición aleatoria que NUNCA se superpone con "Sí"
   const moveNoButton = useCallback(() => {
     const arena = arenaRef.current;
-    if (!arena) return;
+    const yesBtn = yesRef.current;
+    if (!arena || !yesBtn) return;
 
     const arenaRect = arena.getBoundingClientRect();
-    // Tamaño estimado del botón (se va encogiendo, ver CSS)
-    const btnWidth = 140 - Math.min(noCount, 12) * 6;
-    const btnHeight = 56 - Math.min(noCount, 6) * 4;
+    const yesRect = yesBtn.getBoundingClientRect();
 
-    const maxLeft = Math.max(0, arenaRect.width - btnWidth);
-    const maxTop = Math.max(0, arenaRect.height - btnHeight);
+    // Tamaño visual del botón "No" (se va encogiendo con cada intento)
+    const nextCount = noCount + 1;
+    const scale = Math.max(0.55, 1 - nextCount * 0.04);
+    const noVisualW = 140 * scale;
+    const noVisualH = 56 * scale;
 
-    let newLeft = Math.random() * maxLeft;
-    let newTop = Math.random() * maxTop;
+    // Centro del botón "Sí" en coords relativas al arena
+    const yesCx = yesRect.left - arenaRect.left + yesRect.width / 2;
+    const yesCy = yesRect.top - arenaRect.top + yesRect.height / 2;
 
-    // Que no quede demasiado cerca de donde estaba (mejor experiencia)
-    const minDistance = 80;
-    let tries = 0;
-    while (
-      tries < 8 &&
-      Math.abs(newLeft - noPos.left) < minDistance &&
-      Math.abs(newTop - noPos.top) < minDistance
-    ) {
-      newLeft = Math.random() * maxLeft;
-      newTop = Math.random() * maxTop;
-      tries++;
+    // Distancia mínima entre centros para que NO se toquen (con padding)
+    const padding = 28;
+    const minDistX = (yesRect.width + noVisualW) / 2 + padding;
+    const minDistY = (yesRect.height + noVisualH) / 2 + padding;
+
+    // Límites del arena para que el "No" no se salga
+    const minCx = noVisualW / 2 + 4;
+    const maxCx = arenaRect.width - noVisualW / 2 - 4;
+    const minCy = noVisualH / 2 + 4;
+    const maxCy = arenaRect.height - noVisualH / 2 - 4;
+
+    // Si el arena es tan pequeño que no hay zona libre, movemos al rincón más lejano
+    if (minDistX > maxCx - minCx || minDistY > maxCy - minCy) {
+      // Coloca el "No" lo más lejos posible del "Sí"
+      const farCx = yesCx > arenaRect.width / 2 ? minCx : maxCx;
+      const farCy = yesCy > arenaRect.height / 2 ? minCy : maxCy;
+      setNoPos({
+        left: (farCx / arenaRect.width) * 100,
+        top: (farCy / arenaRect.height) * 100,
+      });
+      setNoCount((c) => c + 1);
+      return;
     }
 
-    setNoPos({ top: newTop, left: newLeft });
+    // Genera candidatos aleatorios hasta encontrar uno FUERA de la "zona prohibida"
+    let cx = minCx;
+    let cy = minCy;
+    let found = false;
+    for (let tries = 0; tries < 80 && !found; tries++) {
+      cx = minCx + Math.random() * (maxCx - minCx);
+      cy = minCy + Math.random() * (maxCy - minCy);
+      const dx = Math.abs(cx - yesCx);
+      const dy = Math.abs(cy - yesCy);
+      // No overlap si en AL MENOS un eje la distancia es >= la mitad de la suma
+      if (dx >= minDistX || dy >= minDistY) {
+        found = true;
+      }
+    }
+
+    setNoPos({
+      left: (cx / arenaRect.width) * 100,
+      top: (cy / arenaRect.height) * 100,
+    });
     setNoCount((c) => c + 1);
-  }, [noCount, noPos]);
+  }, [noCount]);
 
   const handleNoInteraction = useCallback(
     (e: React.MouseEvent | React.TouchEvent) => {
@@ -111,6 +149,7 @@ export default function Home() {
 
         <div ref={arenaRef} className={styles.buttonsArena}>
           <button
+            ref={yesRef}
             className={styles.yesButton}
             onClick={() => setSaidYes(true)}
             aria-label="Sí, quiero una cita"
@@ -121,10 +160,13 @@ export default function Home() {
           <button
             className={styles.noButton}
             style={{
-              top: `${noPos.top}px`,
-              left: `${noPos.left}px`,
-              // El botón se va encogiendo con cada intento
-              transform: `scale(${Math.max(0.55, 1 - noCount * 0.04)})`,
+              // Posición en % del arena → el transform translate(-50%,-50%) lo centra ahí
+              left: `${noPos.left}%`,
+              top: `${noPos.top}%`,
+              transform: `translate(-50%, -50%) scale(${Math.max(
+                0.55,
+                1 - noCount * 0.04
+              )})`,
             }}
             onMouseEnter={moveNoButton}
             onTouchStart={handleNoInteraction}

@@ -94,8 +94,9 @@
 .noButton {
   position: absolute;
   top: 50%;
-  left: 70%;
-  transform: translate(0, -50%) scale(1);
+  left: 75%;
+  /* Mismo centrado que el "Sí" para que se vean lado a lado */
+  transform: translate(-50%, -50%) scale(1);
   background: rgba(255, 255, 255, 0.9);
   color: #4a2740;
   border: 2px solid #d8b8c8;
@@ -104,7 +105,7 @@
   font-size: 1.05rem;
   font-weight: 600;
   cursor: not-allowed;
-  transition: top 0.18s ease, left 0.18s ease, transform 0.18s ease;
+  transition: top 0.22s ease, left 0.22s ease, transform 0.18s ease;
   z-index: 3;
   /* Truco: si el usuario llega a hacer click, se mueve otra vez */
   user-select: none;
