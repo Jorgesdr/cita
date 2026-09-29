@@ -31,7 +31,9 @@ export default function Home() {
     "¡No insistas!",
   ];
 
-  // Mueve el botón "No" a una posición aleatoria que NUNCA se superpone con "Sí"
+  // Mueve el botón "No" a una posición aleatoria que:
+//  1) NUNCA se superpone con "Sí"
+//  2) Salta una distancia GRANDE desde la posición anterior (mínimo ~40% del arena en X o 35% en Y)
   const moveNoButton = useCallback(() => {
     const arena = arenaRef.current;
     const yesBtn = yesRef.current;
@@ -50,10 +52,18 @@ export default function Home() {
     const yesCx = yesRect.left - arenaRect.left + yesRect.width / 2;
     const yesCy = yesRect.top - arenaRect.top + yesRect.height / 2;
 
+    // Centro anterior del "No" (también en coords del arena)
+    const prevCx = (noPos.left / 100) * arenaRect.width;
+    const prevCy = (noPos.top / 100) * arenaRect.height;
+
     // Distancia mínima entre centros para que NO se toquen (con padding)
     const padding = 28;
     const minDistX = (yesRect.width + noVisualW) / 2 + padding;
     const minDistY = (yesRect.height + noVisualH) / 2 + padding;
+
+    // Distancia MÍNIMA de salto (para que no se quede a 4 píxeles)
+    const minJumpX = arenaRect.width * 0.4; // 40% del ancho
+    const minJumpY = arenaRect.height * 0.35; // 35% del alto
 
     // Límites del arena para que el "No" no se salga
     const minCx = noVisualW / 2 + 4;
@@ -63,7 +73,6 @@ export default function Home() {
 
     // Si el arena es tan pequeño que no hay zona libre, movemos al rincón más lejano
     if (minDistX > maxCx - minCx || minDistY > maxCy - minCy) {
-      // Coloca el "No" lo más lejos posible del "Sí"
       const farCx = yesCx > arenaRect.width / 2 ? minCx : maxCx;
       const farCy = yesCy > arenaRect.height / 2 ? minCy : maxCy;
       setNoPos({
@@ -74,17 +83,22 @@ export default function Home() {
       return;
     }
 
-    // Genera candidatos aleatorios hasta encontrar uno FUERA de la "zona prohibida"
+    // Genera candidatos aleatorios hasta encontrar uno que:
+    //  a) no se superponga con "Sí"
+    //  b) haya saltado al menos minJumpX o minJumpY desde la posición anterior
     let cx = minCx;
     let cy = minCy;
     let found = false;
-    for (let tries = 0; tries < 80 && !found; tries++) {
+    for (let tries = 0; tries < 120 && !found; tries++) {
       cx = minCx + Math.random() * (maxCx - minCx);
       cy = minCy + Math.random() * (maxCy - minCy);
       const dx = Math.abs(cx - yesCx);
       const dy = Math.abs(cy - yesCy);
-      // No overlap si en AL MENOS un eje la distancia es >= la mitad de la suma
-      if (dx >= minDistX || dy >= minDistY) {
+      const jumpDx = Math.abs(cx - prevCx);
+      const jumpDy = Math.abs(cy - prevCy);
+      const farFromYes = dx >= minDistX || dy >= minDistY;
+      const bigJump = jumpDx >= minJumpX || jumpDy >= minJumpY;
+      if (farFromYes && bigJump) {
         found = true;
       }
     }
@@ -94,7 +108,7 @@ export default function Home() {
       top: (cy / arenaRect.height) * 100,
     });
     setNoCount((c) => c + 1);
-  }, [noCount]);
+  }, [noCount, noPos]);
 
   const handleNoInteraction = useCallback(
     (e: React.MouseEvent | React.TouchEvent) => {
